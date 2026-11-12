@@ -27,7 +27,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;background:var(--bg)}
+html{background:var(--bg)}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 ::selection{background:rgba(196,171,124,.35);color:var(--head)}
 a{color:inherit}
@@ -228,17 +228,22 @@ footer span{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:
 .media img,.media video{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:cover}
 .media figcaption{display:flex;justify-content:space-between;gap:12px;padding-top:12px;font-size:.85rem;color:var(--muted)}
 .media figcaption .eyebrow{letter-spacing:.26em;font-size:.64rem}
-.film{margin-top:48px}
+.film{margin-top:8px}
 .film .frame{aspect-ratio:16/9}
-.stills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:64px}
+.madefrom{margin-top:64px;padding-top:28px;border-top:1px solid var(--line2);font-family:var(--serif);font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.3;color:var(--head);max-width:40ch}
+.madefrom::before{content:"";display:inline-block;width:36px;height:1px;background:var(--gold);vertical-align:middle;margin-right:16px;transform:translateY(-4px)}
+.stills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:28px}
+.stills::after{content:"";grid-column:1/-1;justify-self:center;width:1px;height:48px;margin-top:8px;background:linear-gradient(var(--gold),transparent)}
 .stills .frame{aspect-ratio:16/9}
 .media figcaption span:last-child{font-variant-numeric:tabular-nums}
 @media (max-width:760px){.stills{grid-template-columns:1fr;gap:28px}}
 
 /* cta */
 .contact .btn{margin-bottom:6px}
-.mail{font-size:.95rem;color:var(--muted)}
+.contact p.mail{display:block;font-size:.95rem;color:var(--muted)}
 .mail span{user-select:all}
+.terms span{white-space:nowrap}
+@media (max-width:620px){.terms span{display:block;line-height:2}.terms .dot{display:none}}
 .terms{margin-top:22px;font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--faint)}
 
 /* rack-focus reveal */
@@ -350,6 +355,7 @@ footer span{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:
       <p class="lede">A glimpse of the moments, movement, and music that come together in a Lifescape.</p>
     </div>
 
+    <p class="madefrom rv">These three photographs were used to create the short film below.</p>
     <div class="stills">
       <figure class="media rv"><div class="frame" data-label="Photograph 01"><img src="assets/still-1.jpg" alt="Two young sisters smiling on a sofa beside a kitten" loading="lazy"></div><figcaption><span class="eyebrow">Original photograph</span><span>01</span></figcaption></figure>
       <figure class="media rv"><div class="frame" data-label="Photograph 02"><img src="assets/still-2.jpg" alt="A girl in a blue costume dress laughing beside her mother at the stove" loading="lazy"></div><figcaption><span class="eyebrow">Original photograph</span><span>02</span></figcaption></figure>
@@ -362,7 +368,7 @@ footer span{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:
           <source src="assets/film.webm" type="video/webm">
         </video>
       </div>
-      <figcaption><span class="eyebrow">The film</span><span>Made from these three photographs</span></figcaption>
+      <figcaption><span class="eyebrow">The film</span><span>Made from the three photographs above</span></figcaption>
     </figure>
   </div>
 </section>
@@ -374,9 +380,9 @@ footer span{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:
     <div class="eyebrow" style="margin-bottom:30px">Rega Studios</div>
     <p class="q">We'd love to create something meaningful<br>with your family.</p>
     <div class="contact">
-      <a class="btn" id="mailLink" href="mailto:hello@regastudios.com">Tell us about your celebration</a>
-      <div class="mail"><span id="mailText">hello@regastudios.com</span><button class="copy" id="copyBtn" type="button">Copy</button></div>
-      <p class="terms">Projects start at $2,500 &middot; Now accepting projects for March 2027</p>
+      <a class="btn" id="mailLink" href="mailto:hello@regastudios.com?subject=Lifescape%20inquiry&body=Hi%20Rega%20Studios%2C%0A%0AOccasion%3A%0AEvent%20date%3A%0AWho%20the%20film%20is%20for%3A%0AAnything%20else%20you%27d%20like%20us%20to%20know%3A%0A%0A">Tell us about your celebration</a>
+      <p class="mail">or write to us at <span id="mailText">hello@regastudios.com</span></p>
+      <p class="terms"><span>Projects start at $2,500</span><span class="dot"> &middot; </span><span>Now accepting new inquiries for March 2027</span></p>
     </div>
   </div>
 </section>
@@ -582,13 +588,20 @@ footer span{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:
     targets.forEach(el => { if (el.getBoundingClientRect().top > innerHeight) { el.classList.add('pre'); rio.observe(el); } });
   }
 
-  /* ---------- copy email ---------- */
-  const btn = document.getElementById('copyBtn'), mailText = document.getElementById('mailText');
-  btn.addEventListener('click', () => {
-    const done = () => { btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy', 1800); };
-    try { navigator.clipboard.writeText(mailText.textContent.trim()).then(done, () => getSelection().selectAllChildren(mailText)); }
-    catch (e) { getSelection().selectAllChildren(mailText); }
-  });
+  /* ---------- gentle, unhurried scroll for in-page links ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1), el = id && document.getElementById(id);
+    if (!el || reduce) return;
+    e.preventDefault();
+    const y0 = scrollY, y1 = el.getBoundingClientRect().top + scrollY - (id === 'home' ? 0 : 40);
+    const dist = Math.abs(y1 - y0), dur = clamp(dist / 2.2, 900, 2600), t0 = performance.now();
+    const step = now => {
+      const k = clamp((now - t0) / dur), e2 = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      scrollTo(0, y0 + (y1 - y0) * e2);
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }));
 
   /* ---------- examples: missing files fall back to their placeholder ---------- */
   document.querySelectorAll('.media img').forEach(img => {
