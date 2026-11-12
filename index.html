@@ -589,20 +589,31 @@ footer span{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:
     targets.forEach(el => { if (el.getBoundingClientRect().top > innerHeight) { el.classList.add('pre'); rio.observe(el); } });
   }
 
-  /* ---------- gentle, unhurried scroll for in-page links ---------- */
+  /* ---------- gentle, unhurried scroll for in-page links ----------
+     The pinned film section only moves the clip, not the page, so a glide skips
+     straight past its scroll range instead of lingering on it. */
+  let gliding = 0;
   document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
     const id = a.getAttribute('href').slice(1), el = id && document.getElementById(id);
     if (!el || reduce) return;
     e.preventDefault();
     const y0 = scrollY, y1 = el.getBoundingClientRect().top + scrollY - (id === 'home' ? 0 : 40);
-    const dist = Math.abs(y1 - y0), dur = clamp(dist / 2.2, 900, 2600), t0 = performance.now();
+    const R0 = reel.offsetTop, span = Math.max(0, reel.offsetHeight - innerHeight), R1 = R0 + span;
+    // positions with the pinned range taken out: what the eye actually sees move
+    const toVis = y => y <= R0 ? y : y >= R1 ? y - span : R0;
+    const toReal = (v, dir) => v < R0 ? v : v > R0 ? v + span : (dir > 0 ? R1 : R0);
+    const v0 = toVis(y0), v1 = toVis(y1), dir = Math.sign(v1 - v0);
+    const dist = Math.abs(v1 - v0), dur = clamp(dist / 2.2, 900, 2200), t0 = performance.now(), my = ++gliding;
     const step = now => {
+      if (my !== gliding) return;
       const k = clamp((now - t0) / dur), e2 = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-      scrollTo(0, y0 + (y1 - y0) * e2);
+      scrollTo(0, k < 1 ? toReal(v0 + (v1 - v0) * e2, dir) : y1);
       if (k < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
   }));
+  // a wheel or touch during a glide hands control straight back
+  ['wheel', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, () => { gliding++; }, { passive: true }));
 
   /* ---------- examples: missing files fall back to their placeholder ---------- */
   document.querySelectorAll('.media img').forEach(img => {
